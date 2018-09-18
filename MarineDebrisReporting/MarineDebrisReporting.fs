@@ -5,6 +5,7 @@ open Fabulous.Core
 open Fabulous.DynamicViews
 open Fabulous.DynamicViews.MapsExtension
 open Xamarin.Forms
+open Xamarin.Forms.Maps
 open Xamarin.Essentials
 open Model 
 open System
@@ -16,7 +17,15 @@ module App =
         | LocationFound of Location
         | Reset
 
-    let newReport = { Timestamp = DateTime.Now; Location = None; Size = None; Material = None; Weight = None; Notes = None; Picture = None }
+    let newReport = { 
+        Timestamp = DateTime.Now; 
+        Location = None; 
+        Size = None; 
+        Material = None; 
+        Weight = None; 
+        Notes = None; 
+        Picture = None; 
+        MapRegion = new MapSpan(new Position(21.3, -157.9), 0.3, 0.3)  }
 
     let init () = newReport, Cmd.none
 
@@ -37,7 +46,7 @@ module App =
         View.ContentPage(
           content = View.StackLayout(padding = 20.0, verticalOptions = LayoutOptions.Center,
             children = [
-                View.Map(heightRequest = 320., widthRequest = 320., horizontalOptions = LayoutOptions.Center)
+                View.Map(heightRequest = 320., widthRequest = 320., horizontalOptions = LayoutOptions.Center, backgroundColor = Color.AliceBlue, requestedRegion = model.MapRegion )
                 View.Label(text = sprintf "%d" 123, horizontalOptions = LayoutOptions.Center, fontSize = "Large")
                 View.Button(text = "Increment", command = (fun () -> ignore()), horizontalOptions = LayoutOptions.Center)
                 View.Button(text = "Reset", horizontalOptions = LayoutOptions.Center, command = (fun () -> dispatch Reset))
