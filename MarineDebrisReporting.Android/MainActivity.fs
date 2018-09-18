@@ -23,7 +23,6 @@ type MainActivity() =
         Xamarin.Essentials.Platform.Init(this, bundle)
 
         Xamarin.Forms.Forms.Init (this, bundle)
-        Xamarin.FormsMaps.Init(this, bundle)
 
         let appcore  = new MarineDebrisReporting.App()
         this.LoadApplication (appcore)
