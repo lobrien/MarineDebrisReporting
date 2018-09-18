@@ -2,8 +2,6 @@
 
 open System
 open Xamarin.Essentials
-open Fabulous.DynamicViews.MapsExtension
-open Xamarin.Forms.Maps
 
 module Model =
 
@@ -42,7 +40,6 @@ module Model =
             Weight : Option<DebrisWeightT>
             Notes : Option<String> 
             Picture : Option<unit -> FileSystemUrl>
-            MapRegion : MapSpan
         }
         
 
