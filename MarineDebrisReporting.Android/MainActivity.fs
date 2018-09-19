@@ -25,10 +25,13 @@ type MainActivity() =
         Xamarin.Forms.Forms.Init (this, bundle)
         Xamarin.FormsMaps.Init(this, bundle)
 
+        CrossCurrentActivity.Current.Init(this, bundle);
+
         let appcore  = new MarineDebrisReporting.App()
         this.LoadApplication (appcore)
 
     override this.OnRequestPermissionsResult(requestCode: int, permissions: string[], [<GeneratedEnum>] grantResults: Android.Content.PM.Permission[]) =
         Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults)
-
+        Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        
         base.OnRequestPermissionsResult(requestCode, permissions, grantResults)
