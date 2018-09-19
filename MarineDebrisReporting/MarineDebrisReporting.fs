@@ -17,17 +17,24 @@ module App =
         | LocationFound of Location
         | Reset
 
-    let newReport = { 
-        Timestamp = DateTime.Now; 
-        Location = None; 
-        Size = None; 
-        Material = None; 
-        Weight = None; 
-        Notes = None; 
-        Picture = None; 
-        MapRegion = new MapSpan(new Position(21.3, -157.9), 0.3, 0.3)  }
 
-    let init () = newReport, Cmd.none
+    let defaultReport : Report = {
+        Timestamp = DateTime.Now;
+        Location = None;
+        Size = None;
+        Material = None;
+        Weight = None;
+        Notes = None;
+    }
+    
+    let init () = 
+
+        let initModel = {
+            MapRegion = new MapSpan(new Position(21.3, -157.9), 0.3, 0.3);
+            Report = None
+            }
+
+        initModel, Cmd.none
 
     let locationCmd = 
         async { 
@@ -37,12 +44,15 @@ module App =
 
     let update msg model =
         match msg with
-        | DefaultReport -> newReport, locationCmd
-        | LocationFound loc -> { model with Location = Some loc}, Cmd.none
+        | DefaultReport -> { model with Report = Some defaultReport }, locationCmd
+        | LocationFound loc -> { model with Report = Some { model.Report.Value with Location = Some loc}}, Cmd.none
         | Reset -> raise <| new NotImplementedException()
 
+    let choosePhoto = 
+        let pictureService = DependencyService.Get<IPictureService>()
+        pictureService.PictureFn()
 
-    let view (model: Report) dispatch =
+    let view model dispatch =
         View.ContentPage(
           content = View.StackLayout(padding = 20.0, verticalOptions = LayoutOptions.Center,
             children = [

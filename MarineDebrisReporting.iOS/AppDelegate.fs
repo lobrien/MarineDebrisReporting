@@ -11,6 +11,19 @@ open Xamarin.Forms.Platform.iOS
 type AppDelegate () =
     inherit FormsApplicationDelegate ()
 
+    let iosPictureFn  = fun () ->
+            let imagePicker = new UIImagePickerController()
+            imagePicker.SourceType <- UIImagePickerControllerSourceType.PhotoLibrary
+            imagePicker.MediaTypes <- UIImagePickerController.AvailableMediaTypes(UIImagePickerControllerSourceType.PhotoLibrary)
+
+            imagePicker.FinishedPickingMedia.Add(fun e -> ignore() )
+
+            imagePicker.Canceled.Add( fun e -> ignore())
+
+            let window = UIApplication.SharedApplication.KeyWindow
+            let vc = window.RootViewController
+            vc.PresentModalViewController(imagePicker, true)
+
     override this.FinishedLaunching (app, options) =
         Forms.Init()
         Xamarin.FormsMaps.Init()

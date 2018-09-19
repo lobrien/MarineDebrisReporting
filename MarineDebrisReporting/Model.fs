@@ -9,11 +9,14 @@ module Model =
 
     type FileSystemUrl = string
 
+    type IPictureService  =
+        abstract member PictureFn : (unit -> System.Threading.Tasks.Task<FileSystemUrl>)
+
     type DebrisWeightT = 
         | Light
         | Totable
         | Liftable
-        | Heavy
+        | CouplePeople
         | MachineOnly
 
     type DebrisSizeT = 
@@ -41,8 +44,12 @@ module Model =
             Material : Option<MaterialT>
             Weight : Option<DebrisWeightT>
             Notes : Option<String> 
-            Picture : Option<unit -> FileSystemUrl>
+        }
+
+    type Model = 
+        {
             MapRegion : MapSpan
+            Report : Option<Report>
         }
         
 
