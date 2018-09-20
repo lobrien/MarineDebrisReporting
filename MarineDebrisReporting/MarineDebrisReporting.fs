@@ -9,12 +9,20 @@ open Xamarin.Forms.Maps
 open Xamarin.Essentials
 open Model 
 open System
+open Plugin.Media
+open Plugin.Permissions
+open System.Net
 
 module App = 
 
     type Msg = 
         | DefaultReport 
         | LocationFound of Location
+        | TakePhoto
+        | PhotoTaken of Option<IO.Stream>
+        | Error of string
+        | MakeReport 
+        | SubmissionResult of string
         | Reset
 
 
@@ -24,17 +32,18 @@ module App =
         Size = None;
         Material = None;
         Weight = None;
+        Photo = None;
         Notes = None;
     }
-    
-    let init () = 
 
-        let initModel = {
-            MapRegion = new MapSpan(new Position(21.3, -157.9), 0.3, 0.3);
-            Report = None
-            }
+    let weightPickerSource = 
+        [| "Easy to pick up"; "One person could carry it a distance"; "One person could lift it"; "A couple people could carry it"; "Equipment necessary" |] 
 
-        initModel, Cmd.none
+    let sizePickerSource = 
+        [| "Piece of trash"; "Pile of trash"; "Single large piece"; "Pile with large pieces"; "Ropey"; "Other / Unknown" |]
+
+    let materialPickerSource = 
+        [| "Plastic"; "Wood"; "Metal"; "Fiberglass"; "Fishing Gear"; "Assorted"; "Other / Unknown"|]
 
     let locationCmd = 
         async { 
@@ -42,24 +51,91 @@ module App =
             return LocationFound loc
         } |> Cmd.ofAsyncMsg
 
+    let init () = 
+
+        let initModel = {
+            MapRegion = new MapSpan(new Position(21.3, -157.9), 0.3, 0.3);
+            Report = None
+            Error = None
+            }
+
+        initModel, locationCmd
+
+
+    let PhotoCaptureAsync = 
+        async {
+            let! successfulInit = CrossMedia.Current.Initialize() |> Async.AwaitTask
+            match successfulInit, CrossMedia.Current.IsCameraAvailable, CrossMedia.Current.IsTakePhotoSupported with 
+                | true, true, true  -> 
+                    let options = new Plugin.Media.Abstractions.StoreCameraMediaOptions()
+                    options.Name <- "MarineDebris.jpg"
+                    options.Directory <- "HackTheSea"
+                    let! file = CrossMedia.Current.TakePhotoAsync(options) |> Async.AwaitTask
+                    match file <> null with 
+                    | true -> 
+                        return file.GetStreamWithImageRotatedForExternalStorage() |> Some |> PhotoTaken
+                    | false -> 
+                        return "Media capture did not work" |> Error
+                | _ -> 
+                    return "Media capture did not initialize" |> Error
+        } |> Cmd.ofAsyncMsg
+
+    let toJson report = 
+        "{ }"
+
+    let reportSubmissionAsync report = 
+        async {
+            let url = "https://127.0.0.1"
+            let data = toJson(report)
+            let uri = Uri(url)
+            use webClient = new WebClient()
+            let! result = webClient.UploadStringTaskAsync(uri, data) |> Async.AwaitTask
+            return result
+        }
+
+    let SubmitReportAsync reportOption = 
+        async {
+            match reportOption with 
+            | Some report -> 
+                let! submissionResult = reportSubmissionAsync(report)
+                return SubmissionResult submissionResult
+            | None -> 
+                return Error "Choose data to make report" 
+        } |> Cmd.ofAsyncMsg
+
     let update msg model =
         match msg with
-        | DefaultReport -> { model with Report = Some defaultReport }, locationCmd
-        | LocationFound loc -> { model with Report = Some { model.Report.Value with Location = Some loc}}, Cmd.none
-        | Reset -> raise <| new NotImplementedException()
-
-    let choosePhoto = 
-        let pictureService = DependencyService.Get<IPictureService>()
-        pictureService.PictureFn()
+        | DefaultReport -> { model with Report = Some defaultReport }, Cmd.none
+        | LocationFound loc -> 
+            let report = match model.Report with 
+                         | Some r -> { r with Location = Some loc }
+                         | None -> { defaultReport with Location = Some loc }
+            let newRegion = new MapSpan(new Position(loc.Latitude, loc.Longitude), 0.025, 0.025)
+            { model with MapRegion = newRegion; Report = Some report }, Cmd.none
+        | TakePhoto -> model, PhotoCaptureAsync
+        | PhotoTaken photo -> 
+            { model with Report = Some { model.Report.Value with Photo = photo }}, Cmd.none
+        | MakeReport -> 
+            model, SubmitReportAsync(model.Report)
+        | SubmissionResult s -> { model with Error = Some s; Report = Some defaultReport }, Cmd.none
+        | Reset -> init()
+        | Error s -> { model with Error = Some s }, Cmd.none
 
     let view model dispatch =
+        let errorMsg, errorVisible = match model.Error with 
+                                     | Some e -> e, true
+                                     | None -> "", false
         View.ContentPage(
           content = View.StackLayout(padding = 20.0, verticalOptions = LayoutOptions.Center,
             children = [
-                View.Map(heightRequest = 320., widthRequest = 320., horizontalOptions = LayoutOptions.Center, backgroundColor = Color.AliceBlue, requestedRegion = model.MapRegion )
-                View.Label(text = sprintf "%d" 123, horizontalOptions = LayoutOptions.Center, fontSize = "Large")
-                View.Button(text = "Increment", command = (fun () -> ignore()), horizontalOptions = LayoutOptions.Center)
+                View.Map(heightRequest = 320., widthRequest = 320., horizontalOptions = LayoutOptions.Center, requestedRegion = model.MapRegion )
+                View.Picker(title = "Weight", itemsSource = weightPickerSource, horizontalOptions = LayoutOptions.Center)
+                View.Picker(title = "Size", itemsSource = sizePickerSource, horizontalOptions = LayoutOptions.Center)
+                View.Picker(title = "Material", itemsSource = materialPickerSource, horizontalOptions = LayoutOptions.Center)
+                View.Button(text = "Take photo", command = (fun () -> dispatch TakePhoto), horizontalOptions = LayoutOptions.Center)
+                View.Button(text = "Report it!", command = (fun () -> dispatch MakeReport), horizontalOptions = LayoutOptions.Center)
                 View.Button(text = "Reset", horizontalOptions = LayoutOptions.Center, command = (fun () -> dispatch Reset))
+                View.Label(text = errorMsg, isVisible = errorVisible, horizontalOptions = LayoutOptions.Center)
             ]))
 
     // Note, this declaration is needed if you enable LiveUpdate

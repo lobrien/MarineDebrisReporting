@@ -43,6 +43,7 @@ module Model =
             Size : Option<DebrisSizeT>
             Material : Option<MaterialT>
             Weight : Option<DebrisWeightT>
+            Photo : Option<IO.Stream>
             Notes : Option<String> 
         }
 
@@ -50,6 +51,7 @@ module Model =
         {
             MapRegion : MapSpan
             Report : Option<Report>
+            Error : Option<string>
         }
         
 
