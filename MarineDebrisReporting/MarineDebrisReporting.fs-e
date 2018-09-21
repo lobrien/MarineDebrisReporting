@@ -93,7 +93,7 @@ module App =
         async {
             match maybePhoto with 
             | Some byteStream -> 
-               let csa = CloudStorageAccount.Parse("***CONNECTION STRING***")
+               let csa = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=hackthesea;AccountKey=5yUgPpXqj2mKVwKAzwQpzSt0gnus0XYiM4g1P2gkntgfhDMnS87WTWN0zKzH20eXQW3Mn3rENZDy1xpl18eOnQ==;EndpointSuffix=core.windows.net")
                let ctc = csa.CreateCloudTableClient()
                let table = ctc.GetTableReference("hello")
                let helloTuple = new NameTuple("Some", "debris")
