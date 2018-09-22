@@ -15,11 +15,6 @@ open System.Net
 
 module App = 
 
-    type NameTuple(fst : string, snd : string) = 
-        inherit TableEntity(fst, snd)
-
-        member val public Report = "SomeData"  with get, set
-
     type Msg = 
         | DefaultReport 
         | LocationFound of Location
@@ -123,7 +118,7 @@ module App =
         async {
             match reportOption with 
             | Some report -> 
-                let photoName = report.Timestamp.ToString("o")
+                let photoName = sprintf "%s.jpg" <| report.Timestamp.ToString("o")
                 let! photoResult = photoSubmissionAsync report.Photo photoName "image/jpeg"
                 let! submissionResult = reportSubmissionAsync report photoName
                 return SubmissionResult (submissionResult.ToString())
