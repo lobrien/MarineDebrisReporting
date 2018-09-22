@@ -18,6 +18,8 @@ module App =
     type NameTuple(fst : string, snd : string) = 
         inherit TableEntity(fst, snd)
 
+        member val public Report = "SomeData"  with get, set
+
     type Msg = 
         | DefaultReport 
         | LocationFound of Location
@@ -86,41 +88,45 @@ module App =
                     return "Media capture did not initialize" |> Error
         } |> Cmd.ofAsyncMsg
 
-    let toJson report = 
-        "{ }"
 
-    let photoSubmissionAsync (maybePhoto : IO.Stream option) = 
+    // Put directly in Azure blob storage 
+    let photoSubmissionAsync (maybePhoto : IO.Stream option) imageName imageType = 
         async {
             match maybePhoto with 
             | Some byteStream -> 
-               let csa = CloudStorageAccount.Parse("***CONNECTION STRING***")
-               let ctc = csa.CreateCloudTableClient()
-               let table = ctc.GetTableReference("hello")
-               let helloTuple = new NameTuple("Some", "debris")
-               let insertOperation = TableOperation.Insert(helloTuple)
-               let rv = table.ExecuteAsync(insertOperation) |> Async.AwaitTask
-               let tr = Async.RunSynchronously rv
-               return tr |> Some
-            | None -> return None
+                let containerUrl = "https://hackthesea.blob.core.windows.net/marinedebrispix"
+                let containerName = "marinedebrispix"
+                let csa = CloudStorageAccount.Parse "***CONNECTION STRING***"
+                let ctb = csa.CreateCloudBlobClient()
+                let container = ctb.GetContainerReference containerName
+                let blob = container.GetBlockBlobReference(imageName) //|> Async.AwaitTask
+                blob.Properties.ContentType <- imageType
+                do! blob.UploadFromStreamAsync(byteStream) |> Async.AwaitTask
+                return true
+               | None -> return false
         }
 
-    let reportSubmissionAsync report = 
+    // Put directly in Azure table storage
+    let reportSubmissionAsync report photoUrl = 
         async {
-            let url = "https://127.0.0.1"
-            let data = toJson(report)
-            let uri = Uri(url)
-            use webClient = new WebClient()
-            let! result = webClient.UploadStringTaskAsync(uri, data) |> Async.AwaitTask
-            return result
-        }
+            let csa = CloudStorageAccount.Parse("***CONNECTION STRING***")
+            let ctc = csa.CreateCloudTableClient()
+            let table = ctc.GetTableReference("MarineDebris")
+
+            let record = new ReportStorage(report)
+            let insertOperation = record |> TableOperation.Insert
+            let! tr = table.ExecuteAsync(insertOperation) |> Async.AwaitTask
+            return tr.Etag |> Some
+        } 
 
     let SubmitReportAsync reportOption = 
         async {
             match reportOption with 
             | Some report -> 
-                let! photoResult = photoSubmissionAsync report.Photo
-                let! submissionResult = reportSubmissionAsync(report)
-                return SubmissionResult submissionResult
+                let photoName = report.Timestamp.ToString("o")
+                let! photoResult = photoSubmissionAsync report.Photo photoName "image/jpeg"
+                let! submissionResult = reportSubmissionAsync report photoName
+                return SubmissionResult (submissionResult.ToString())
             | None -> 
                 return Error "Choose data to make report" 
         } |> Cmd.ofAsyncMsg
@@ -140,8 +146,11 @@ module App =
             { model with Report = Some { oldReport with Photo = photo }}, Cmd.none
         | MakeReport -> 
             model, SubmitReportAsync(model.Report)
-        | SubmissionResult s -> { model with Error = Some s; Report = Some defaultReport }, Cmd.none
+        | SubmissionResult s -> 
+            { model with Error = Some s; Report = Some defaultReport }, Cmd.none
         | WeightPicked w -> { model with Report = Some { oldReport with Weight = Some w } }, Cmd.none
+        | MaterialPicked m -> { model with Report = Some { oldReport with Material = Some m} }, Cmd.none
+        | SizePicked s -> { model with Report = Some { oldReport with Size = Some s} }, Cmd.none
         | Reset -> init()
         | Error s -> { model with Error = Some s }, Cmd.none
         

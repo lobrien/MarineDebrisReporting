@@ -4,6 +4,7 @@ open System
 open Xamarin.Essentials
 open Fabulous.DynamicViews.MapsExtension
 open Xamarin.Forms.Maps
+open Microsoft.WindowsAzure.Storage.Table
 
 module Model =
 
@@ -44,6 +45,24 @@ module Model =
             Photo : Option<IO.Stream>
             Notes : Option<String> 
         }
+
+    let toJson report = 
+        let jsonify fld s = sprintf "\"%s\" : \"%A\"" fld s 
+        let ts =jsonify "Timestamp" (report.Timestamp.ToString("o"))
+        let loc = jsonify "Location" report.Location
+        let size = jsonify "Size" report.Size
+        let mat = jsonify "Material" report.Material
+        let wt = jsonify "Weight" report.Weight
+        // TODO: Have to escape Notes
+        let combined = [ ts; loc; size; mat; wt ] |> fun s -> String.Join(",\n", s)
+        let outerJsonWrapper = sprintf "{\n %s \n}" combined |> fun s -> s.Replace("\"\"", "\"")
+        outerJsonWrapper
+
+
+    type ReportStorage(report : Report) = 
+        inherit TableEntity( "MainPartition", report.Timestamp.ToString("o"))
+
+        member val public Report = report |> toJson with get, set
 
     type Model = 
         {
