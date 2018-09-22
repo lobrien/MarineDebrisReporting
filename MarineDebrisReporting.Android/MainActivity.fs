@@ -24,6 +24,7 @@ type MainActivity() =
 
         Xamarin.Forms.Forms.Init (this, bundle)
         Xamarin.FormsMaps.Init(this, bundle)
+        ImageCircle.Forms.Plugin.Droid.ImageCircleRenderer.Init()
 
         Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
 

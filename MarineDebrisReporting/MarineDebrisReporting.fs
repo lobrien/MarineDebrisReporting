@@ -5,13 +5,14 @@ open Fabulous.DynamicViews
 open Xamarin.Forms
 open Xamarin.Forms.Maps
 open Xamarin.Essentials
-open Model 
 open System
 open Plugin.Media
 open Microsoft.WindowsAzure.Storage
 open Microsoft.WindowsAzure.Storage.Blob
 open Microsoft.WindowsAzure.Storage.Table
-open System.Net
+
+open Model 
+open ImageCircle
 
 module App = 
 
@@ -85,7 +86,7 @@ module App =
 
 
     // Put directly in Azure blob storage 
-    let photoSubmissionAsync (maybePhoto : IO.Stream option) imageName imageType = 
+    let photoSubmissionAsync cloudStorageAccount imageType (maybePhoto : IO.Stream option) imageName = 
         async {
             match maybePhoto with 
             | Some byteStream -> 
@@ -102,10 +103,9 @@ module App =
         }
 
     // Put directly in Azure table storage
-    let reportSubmissionAsync report photoUrl = 
+    let reportSubmissionAsync (cloudStorageAccount : CloudStorageAccount) report photoName = 
         async {
-            let csa = CloudStorageAccount.Parse("***CONNECTION STRING***")
-            let ctc = csa.CreateCloudTableClient()
+            let ctc = cloudStorageAccount.CreateCloudTableClient() 
             let table = ctc.GetTableReference("MarineDebris")
 
             let record = new ReportStorage(report)
@@ -119,8 +119,9 @@ module App =
             match reportOption with 
             | Some report -> 
                 let photoName = sprintf "%s.jpg" <| report.Timestamp.ToString("o")
-                let! photoResult = photoSubmissionAsync report.Photo photoName "image/jpeg"
-                let! submissionResult = reportSubmissionAsync report photoName
+                let csa = CloudStorageAccount.Parse("***CONNECTION STRING***")
+                let! photoResult = photoSubmissionAsync csa "image/jpeg" report.Photo photoName 
+                let! submissionResult = reportSubmissionAsync csa report photoName
                 return SubmissionResult (submissionResult.ToString())
             | None -> 
                 return Error "Choose data to make report" 
@@ -148,9 +149,16 @@ module App =
         | SizePicked s -> { model with Report = Some { oldReport with Size = Some s} }, Cmd.none
         | Reset -> init()
         | Error s -> { model with Error = Some s }, Cmd.none
-        
+
     let view model dispatch =
 
+        let buildProgressPanel = 
+            let panel = View.StackLayout(padding = 10.0, orientation = StackOrientation.Horizontal, children = [ 
+                View.CircleImage("albie.jpg")
+                View.CircleImage("p1.png")
+            ])
+            panel
+ 
         let errorMsg, errorVisible = match model.Error with 
                                      | Some e -> e, true
                                      | None -> "", false
@@ -165,6 +173,7 @@ module App =
                 View.Button(text = "Report it!", command = (fun () -> dispatch MakeReport), horizontalOptions = LayoutOptions.Center)
                 View.Button(text = "Reset", horizontalOptions = LayoutOptions.Center, command = (fun () -> dispatch Reset))
                 View.Label(text = errorMsg, isVisible = errorVisible, horizontalOptions = LayoutOptions.Center)
+                buildProgressPanel
             ]))
 
     // Note, this declaration is needed if you enable LiveUpdate

@@ -197,6 +197,12 @@
     <Reference Include="Plugin.CurrentActivity">
       <HintPath>..\packages\Plugin.CurrentActivity.2.1.0.4\lib\monoandroid44\Plugin.CurrentActivity.dll</HintPath>
     </Reference>
+    <Reference Include="ImageCircle.Forms.Plugin">
+      <HintPath>..\packages\Xam.Plugins.Forms.ImageCircle.3.0.0.6-beta\lib\monoandroid71\ImageCircle.Forms.Plugin.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Forms.CarouselView">
+      <HintPath>..\packages\Xamarin.Forms.CarouselView.2.3.0-pre2\lib\MonoAndroid10\Xamarin.Forms.CarouselView.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />
@@ -221,6 +227,15 @@
     <AndroidResource Include="Resources\mipmap-xxxhdpi\Icon.png" />
     <AndroidResource Include="Resources\mipmap-xxxhdpi\launcher_foreground.png" />
     <AndroidResource Include="Resources\xml\file_paths.xml" />
+    <AndroidResource Include="Resources\drawable\p1.png" />
+    <AndroidResource Include="Resources\drawable\p2.png" />
+    <AndroidResource Include="Resources\drawable\p3.png" />
+    <AndroidResource Include="Resources\drawable\p4.png" />
+    <AndroidResource Include="Resources\drawable\p5.png" />
+    <AndroidResource Include="Resources\drawable\p6.png" />
+    <AndroidResource Include="Resources\drawable\p7.png" />
+    <AndroidResource Include="Resources\drawable\albie.jpg" />
+    <AndroidResource Include="Resources\drawable\IMG_0480.JPG" />
     <None Include="packages.config" />
     <ProjectReference Include="..\MarineDebrisReporting\MarineDebrisReporting.fsproj">
       <Project>{3A810F51-58C0-4C2D-B9A7-22C4C3792A22}</Project>

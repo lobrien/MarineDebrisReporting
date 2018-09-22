@@ -14,6 +14,7 @@ type AppDelegate () =
     override this.FinishedLaunching (app, options) =
         Forms.Init()
         Xamarin.FormsMaps.Init()
+        ImageCircle.Forms.Plugin.iOS.ImageCircleRenderer.Init()
         let appcore = new MarineDebrisReporting.App()
         this.LoadApplication (appcore)
         base.FinishedLaunching(app, options)
