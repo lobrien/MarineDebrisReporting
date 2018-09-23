@@ -10,6 +10,7 @@ module CarouselView =
     open System.Reflection
 
     (* What follows is VERY INCOMPLETE based on the `ListView` implementation in Fabulous *)
+    // TODO: Should `Items` be `Children`? 
 
     let ItemsAttribKey = AttributeKey<_> "Items"
 //    let CurrentItemAttribKey = AttributeKey<_> "Item"
@@ -87,7 +88,7 @@ module CarouselView =
 
         updateCarouselViewItems prevCarouselViewItemsOpt currCarouselViewItemsOpt target
 (*
-TODO: I think you _ought_ to be able to assign to `Item` 
+TODO: I think you _ought_ to be able to assign to `Item` and go to that view
         match prevCarouselView_CurrentItemOpt, currCarouselView_CurrentItemOpt with
         | ValueSome prevValue, ValueSome currValue when prevValue = currValue -> ()
         | _, ValueSome currValue -> target.Item <- (function None -> null | Some i -> let items = target.ItemsSource :?> System.Collections.Generic.IList<ListElementData<ViewElement>> in if i >= 0 && i < items.Count then items.[i] else null)  currValue

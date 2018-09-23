@@ -152,48 +152,43 @@ module App =
 
     let view model dispatch =
 
-        let buildProgressPanel = 
-            let panel = View.FlexLayout(padding = 10.0, direction = FlexDirection.Row, children = [ 
-                View.CircleImage("albie.jpg")
-                View.CircleImage("p1.png")
-            ])
-            panel
+        let buildHeader = 
+            View.Label(text = "Opala in Paradise", fontSize = 24, horizontalTextAlignment = TextAlignment.Center)
 
-        let carouselItems = 
-            [
-               View.CircleImage(fname = "p1.png")
-               View.CircleImage(fname = "p2.png"); 
-               View.CircleImage "p3.png"
-            ]
+        let buildInputPages = [
+            View.CircleImage(fname = "p1.png")
+            View.CircleImage(fname = "p2.png"); 
+            View.CircleImage "p3.png"
+        ]
 
-        let carouselTemplate = new DataTemplate(typedefof<Label>)
-            (*
-    new DataTemplate(fun () -> 
-                                                    let l = new Label()
-                                                    l.SetBinding(Label.TextProperty, "Text")
-                                                    l :> obj *)
-//                                                    let vc = new ViewCell()
-//                                                    vc.View <- l
-//                                                    vc :> obj
-//                                                )
+        let buildPages = [
+                    View.CarouselView(items = buildInputPages) |> flexGrow 1.0
+                    View.BoxView(color = Color.Blue) |> flexBasis (new FlexBasis(50.0f,false)) |> flexOrder -1
+                    View.BoxView(color = Color.Green) |> flexBasis (new FlexBasis(50.0f, false))
+                    ]
+
+        let buildContent = 
+            View.FlexLayout(children = buildPages) |> flexGrow 1.0
+
+        let buildFooter = 
+            View.Label(text = "FOOTER", fontSize = 24, backgroundColor = Color.Pink, horizontalTextAlignment = TextAlignment.Center) 
+            |> direction FlexDirection.Column 
+            |> flexBasis (new FlexBasis(100.0f, false))
 
         let errorMsg, errorVisible = match model.Error with 
                                      | Some e -> e, true
                                      | None -> "", false
-        View.ContentPage(
-          content = View.FlexLayout(padding = 20.0, direction = FlexDirection.Column, verticalOptions = LayoutOptions.Center,
-            children = [
-                View.Map(heightRequest = 320., widthRequest = 320., horizontalOptions = LayoutOptions.Center, requestedRegion = model.MapRegion )
-                View.Picker(title = "Weight", itemsSource = weightPickerSource, selectedIndexChanged = (fun (ix, _) -> enum<DebrisWeightT>(ix) |> WeightPicked |> dispatch), horizontalOptions = LayoutOptions.Center)
-                View.Picker(title = "Size", itemsSource = sizePickerSource, selectedIndexChanged = (fun (ix, _) -> enum<DebrisSizeT>(ix) |> SizePicked |> dispatch ), horizontalOptions = LayoutOptions.Center)
-                View.Picker(title = "Material", itemsSource = materialPickerSource, selectedIndexChanged = (fun (ix, _) -> enum<DebrisMaterialT>(ix) |> MaterialPicked |> dispatch), horizontalOptions = LayoutOptions.Center)
-                View.Button(text = "Take photo", command = (fun () -> dispatch TakePhoto), horizontalOptions = LayoutOptions.Center)
-                View.Button(text = "Report it!", command = (fun () -> dispatch MakeReport), horizontalOptions = LayoutOptions.Center)
-                View.Button(text = "Reset", horizontalOptions = LayoutOptions.Center, command = (fun () -> dispatch Reset))
-                View.Label(text = errorMsg, isVisible = errorVisible, horizontalOptions = LayoutOptions.Center)
-                buildProgressPanel
-                View.CarouselView(items = carouselItems, horizontalOptions = LayoutOptions.Center, verticalOptions = LayoutOptions.Center, heightRequest = float 150)
-            ]))
+
+        View.ContentPage(backgroundColor = Color.Pink,
+            content = View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly, 
+                children = 
+                        [
+                            buildHeader
+                            buildContent
+                            buildFooter
+                        ])
+
+    )
 
     // Note, this declaration is needed if you enable LiveUpdate
     let program = Program.mkProgram init update view
