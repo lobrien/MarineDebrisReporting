@@ -29,6 +29,7 @@ module CarouselView =
               match modelOpt with 
               | Some prev -> 
                   let ty = newModel.GetType()
+                  // BUG: this throws if `newModel` and `this.Content` are not same type (e.g., must be `FlowLayout` and not any `ViewElement`)
                   let res = ty.InvokeMember("UpdateIncremental",(BindingFlags.InvokeMethod ||| BindingFlags.Public ||| BindingFlags.Instance), null, newModel, [| box prev; box this.Content |] )
                   modelOpt <- None
                   ignore res

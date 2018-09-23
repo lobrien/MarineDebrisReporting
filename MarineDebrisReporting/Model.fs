@@ -56,16 +56,8 @@ module Model =
         }
 
     let toJson report = 
-        let jsonify fld s = sprintf "\"%s\" : \"%A\"" fld s 
-        let ts =jsonify "Timestamp" (report.Timestamp.ToString("o"))
-        let loc = jsonify "Location" report.Location
-        let size = jsonify "Size" report.Size
-        let mat = jsonify "Material" report.Material
-        let wt = jsonify "Weight" report.Weight
-        // TODO: Have to escape Notes
-        let combined = [ ts; loc; size; mat; wt ] |> fun s -> String.Join(",\n", s)
-        let outerJsonWrapper = sprintf "{\n %s \n}" combined |> fun s -> s.Replace("\"\"", "\"")
-        outerJsonWrapper
+        let json = Newtonsoft.Json.JsonConvert.SerializeObject(report)
+        json
 
 
     type ReportStorage(report : Report) = 
