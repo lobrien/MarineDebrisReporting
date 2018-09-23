@@ -7,6 +7,7 @@ module CarouselView =
     open Xamarin.Forms
     open Xamarin.Forms
     open System.Collections.ObjectModel
+    open System.Reflection
 
     (* What follows is VERY INCOMPLETE based on the `ListView` implementation in Fabulous *)
 
@@ -14,8 +15,36 @@ module CarouselView =
 //    let CurrentItemAttribKey = AttributeKey<_> "Item"
     let CurrentItemIndexAttribKey = AttributeKey<_> "Position"
 
-    type CustomCarouselView() = 
-        inherit CarouselView(ItemTemplate=DataTemplate(typeof<ViewElementCell>))
+    type CarouselElement() =  
+        inherit ContentView()
+
+        let mutable modelOpt = None
+
+        override this.OnBindingContextChanged () =
+          base.OnBindingContextChanged ()
+          match this.BindingContext with
+          | :? IListElement as data -> 
+              let newModel = data.Key
+              match modelOpt with 
+              | Some prev -> 
+                  let ty = newModel.GetType()
+                  let res = ty.InvokeMember("UpdateIncremental",(BindingFlags.InvokeMethod ||| BindingFlags.Public ||| BindingFlags.Instance), null, newModel, [| box prev; box this.Content |] )
+                  modelOpt <- None
+                  ignore res
+              | None -> 
+                  let ty = newModel.GetType()
+                  let res = ty.InvokeMember("Create",(BindingFlags.InvokeMethod ||| BindingFlags.Public ||| BindingFlags.Instance), null, newModel, [| |] )
+                  match res with 
+                  | :? View as v -> 
+                      this.Content <- v
+                  | _ -> 
+                      failwithf "The cells of a CarouselView must each be some kind of 'View' and not a '%A'" (res.GetType())
+                  modelOpt <- Some newModel
+          | _ -> 
+              modelOpt <- None
+
+    type CustomCarouselView(items : ViewElement list) = 
+        inherit CarouselView(ItemTemplate=DataTemplate(typeof<CarouselElement>))
 
     let updateCarouselViewItems (prevCollOpt: seq<'T> voption) (collOpt: seq<'T> voption) (target: Xamarin.Forms.CarouselView) = 
         let targetColl = 
@@ -71,10 +100,6 @@ TODO: I think you _ought_ to be able to assign to `Item`
         | ValueSome _, ValueNone -> target.Position <- 0
         | ValueNone, ValueNone -> ()
 
-    let createCarouselView () : Xamarin.Forms.CarouselView = 
-               upcast (new CustomCarouselView())
-
-    let createFuncCarouselView : (unit -> Xamarin.Forms.CarouselView) = (fun () -> createCarouselView())
 
     let updateFuncCarouselView = (fun (prevOpt: ViewElement voption) (curr: ViewElement) (target: Xamarin.Forms.CarouselView) -> updateCarouselView (prevOpt, curr, target)) 
 
@@ -92,15 +117,19 @@ TODO: I think you _ought_ to be able to assign to `Item`
 
         static member inline CarouselView
              (
-              ?items, ?selectedItemIndex,
+              items, ?selectedItemIndex,
               // inherited attributes common to all views
               ?horizontalOptions, ?verticalOptions, ?margin, ?gestureRecognizers, ?anchorX, ?anchorY, ?backgroundColor, ?heightRequest,
               ?inputTransparent, ?isEnabled, ?isVisible, ?minimumHeightRequest, ?minimumWidthRequest, ?opacity,
               ?rotation, ?rotationX, ?rotationY, ?scale, ?style, ?translationX, ?translationY, ?widthRequest,
               ?resources, ?styles, ?styleSheets, ?classId, ?styleId, ?automationId
              ) =
+                let createCarouselView () : Xamarin.Forms.CarouselView = 
+                            upcast (new CustomCarouselView(items))
+
+                let createFuncCarouselView : (unit -> Xamarin.Forms.CarouselView) = (fun () -> createCarouselView())
 
 
-                let attribBuilder = View.BuildCarouselView(0, ?items=items, ?selectedItem = selectedItemIndex, ?horizontalOptions=horizontalOptions, ?verticalOptions=verticalOptions, ?margin=margin, ?gestureRecognizers=gestureRecognizers, ?anchorX=anchorX, ?anchorY=anchorY, ?backgroundColor=backgroundColor, ?heightRequest=heightRequest, ?inputTransparent=inputTransparent, ?isEnabled=isEnabled, ?isVisible=isVisible, ?minimumHeightRequest=minimumHeightRequest, ?minimumWidthRequest=minimumWidthRequest, ?opacity=opacity, ?rotation=rotation, ?rotationX=rotationX, ?rotationY=rotationY, ?scale=scale, ?style=style, ?translationX=translationX, ?translationY=translationY, ?widthRequest=widthRequest, ?resources=resources, ?styles=styles, ?styleSheets=styleSheets, ?classId=classId, ?styleId=styleId, ?automationId=automationId)
+                let attribBuilder = View.BuildCarouselView(0, items=items, ?selectedItem = selectedItemIndex, ?horizontalOptions=horizontalOptions, ?verticalOptions=verticalOptions, ?margin=margin, ?gestureRecognizers=gestureRecognizers, ?anchorX=anchorX, ?anchorY=anchorY, ?backgroundColor=backgroundColor, ?heightRequest=heightRequest, ?inputTransparent=inputTransparent, ?isEnabled=isEnabled, ?isVisible=isVisible, ?minimumHeightRequest=minimumHeightRequest, ?minimumWidthRequest=minimumWidthRequest, ?opacity=opacity, ?rotation=rotation, ?rotationX=rotationX, ?rotationY=rotationY, ?scale=scale, ?style=style, ?translationX=translationX, ?translationY=translationY, ?widthRequest=widthRequest, ?resources=resources, ?styles=styles, ?styleSheets=styleSheets, ?classId=classId, ?styleId=styleId, ?automationId=automationId)
 
                 ViewElement.Create<Xamarin.Forms.CarouselView>(createFuncCarouselView, updateFuncCarouselView, attribBuilder)
