@@ -161,8 +161,8 @@ module App =
 
         let carouselItems = 
             [
-               View.CircleImage "p1.png";
-               View.CircleImage "p2.png"; 
+               View.CircleImage(fname = "p1.png")
+               View.CircleImage(fname = "p2.png"); 
                View.CircleImage "p3.png"
             ]
 
@@ -192,7 +192,7 @@ module App =
                 View.Button(text = "Reset", horizontalOptions = LayoutOptions.Center, command = (fun () -> dispatch Reset))
                 View.Label(text = errorMsg, isVisible = errorVisible, horizontalOptions = LayoutOptions.Center)
                 buildProgressPanel
-                View.CarouselView(items = carouselItems, horizontalOptions = LayoutOptions.Center, heightRequest = float 170)
+                View.CarouselView(items = carouselItems, horizontalOptions = LayoutOptions.Center, verticalOptions = LayoutOptions.Center, heightRequest = float 150)
             ]))
 
     // Note, this declaration is needed if you enable LiveUpdate

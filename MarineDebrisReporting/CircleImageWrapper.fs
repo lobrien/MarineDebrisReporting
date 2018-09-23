@@ -12,7 +12,7 @@ module CircleImage =
     // Extend `View` (fully-qualified to avoid collisions) to use James Montemagno's nuget 
     type Fabulous.DynamicViews.View with
          static member inline CircleImage
-             (fname : string,
+             (fname,
              // inherited attributes common to all views
               ?horizontalOptions, ?verticalOptions, ?margin, ?gestureRecognizers, ?anchorX, ?anchorY, ?backgroundColor, ?heightRequest,
               ?inputTransparent, ?isEnabled, ?isVisible, ?minimumHeightRequest, ?minimumWidthRequest, ?opacity,
@@ -39,10 +39,11 @@ module CircleImage =
                 let img = new CircleImage()
                 img.BorderColor <- Color.White
                 img.BorderThickness <- float32 3
-                img.HeightRequest <- float 150
-                img.WidthRequest <- float 150
+                img.HeightRequest <- match heightRequest with Some h -> h | None -> float 75
+                img.WidthRequest <- match widthRequest with Some w -> w | None -> float 75
                 img.Aspect <- Aspect.AspectFill
-                img.HorizontalOptions <- LayoutOptions.Center
+                img.HorizontalOptions <- match horizontalOptions with Some o -> o | None -> LayoutOptions.Center
+                img.VerticalOptions <- match verticalOptions with Some o -> o | None -> LayoutOptions.Center
                 img.Source <- FileImageSource.FromFile fname
                 img
 
