@@ -153,17 +153,33 @@ module App =
     let view model dispatch =
 
         let buildProgressPanel = 
-            let panel = View.StackLayout(padding = 10.0, orientation = StackOrientation.Horizontal, children = [ 
+            let panel = View.FlexLayout(padding = 10.0, direction = FlexDirection.Row, children = [ 
                 View.CircleImage("albie.jpg")
                 View.CircleImage("p1.png")
             ])
             panel
- 
+
+        let carouselItems = 
+            [
+                new Label() :> View; new Button() :> View
+            ]
+
+        let carouselTemplate = new DataTemplate(typedefof<Label>)
+            (*
+    new DataTemplate(fun () -> 
+                                                    let l = new Label()
+                                                    l.SetBinding(Label.TextProperty, "Text")
+                                                    l :> obj *)
+//                                                    let vc = new ViewCell()
+//                                                    vc.View <- l
+//                                                    vc :> obj
+//                                                )
+
         let errorMsg, errorVisible = match model.Error with 
                                      | Some e -> e, true
                                      | None -> "", false
         View.ContentPage(
-          content = View.StackLayout(padding = 20.0, verticalOptions = LayoutOptions.Center,
+          content = View.FlexLayout(padding = 20.0, direction = FlexDirection.Column, verticalOptions = LayoutOptions.Center,
             children = [
                 View.Map(heightRequest = 320., widthRequest = 320., horizontalOptions = LayoutOptions.Center, requestedRegion = model.MapRegion )
                 View.Picker(title = "Weight", itemsSource = weightPickerSource, selectedIndexChanged = (fun (ix, _) -> enum<DebrisWeightT>(ix) |> WeightPicked |> dispatch), horizontalOptions = LayoutOptions.Center)
@@ -174,6 +190,7 @@ module App =
                 View.Button(text = "Reset", horizontalOptions = LayoutOptions.Center, command = (fun () -> dispatch Reset))
                 View.Label(text = errorMsg, isVisible = errorVisible, horizontalOptions = LayoutOptions.Center)
                 buildProgressPanel
+                View.CarouselView(items = carouselItems, backgroundColor = Color.Pink, horizontalOptions = LayoutOptions.Center)
             ]))
 
     // Note, this declaration is needed if you enable LiveUpdate

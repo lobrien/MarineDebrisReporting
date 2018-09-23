@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="Model.fs" />
     <Compile Include="CircleImageWrapper.fs" />
+    <Compile Include="CarouselViewWrapper.fs" />
     <Compile Include="MarineDebrisReporting.fs" />
   </ItemGroup>
   <ItemGroup>
