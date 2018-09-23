@@ -22,10 +22,11 @@ module App =
         | WeightPicked of DebrisWeightT
         | SizePicked of DebrisSizeT
         | MaterialPicked of DebrisMaterialT
+        | BiotaPicked of BiotaT
         | TakePhoto
         | PhotoTaken of Option<IO.Stream>
         | Error of string
-        | MakeReport 
+        | SubmitReport 
         | SubmissionResult of string
         | Reset
 
@@ -37,6 +38,7 @@ module App =
         Material = None;
         Weight = None;
         Photo = None;
+        Biota = [];
         Notes = None;
     }
 
@@ -140,13 +142,13 @@ module App =
         | TakePhoto -> model, PhotoCaptureAsync
         | PhotoTaken photo -> 
             { model with Report = Some { oldReport with Photo = photo }}, Cmd.none
-        | MakeReport -> 
-            model, SubmitReportAsync(model.Report)
+        | SubmitReport -> model, SubmitReportAsync(model.Report)
         | SubmissionResult s -> 
             { model with Error = Some s; Report = Some defaultReport }, Cmd.none
         | WeightPicked w -> { model with Report = Some { oldReport with Weight = Some w } }, Cmd.none
         | MaterialPicked m -> { model with Report = Some { oldReport with Material = Some m} }, Cmd.none
         | SizePicked s -> { model with Report = Some { oldReport with Size = Some s} }, Cmd.none
+        | BiotaPicked b -> { model with Report = Some { oldReport with Biota = b :: oldReport.Biota}}, Cmd.none
         | Reset -> init()
         | Error s -> { model with Error = Some s }, Cmd.none
 
@@ -155,23 +157,74 @@ module App =
         let buildHeader = 
             View.Label(text = "Opala in Paradise", fontSize = 24, horizontalTextAlignment = TextAlignment.Center)
 
+        let buildGriddedElement children = 
+            View.FlexLayout(wrap = FlexWrap.Wrap, justifyContent = FlexJustify.SpaceAround, children = children)
+
+        let buildPage1 = 
+            let locMsg = match model.Report |> Option.bind (fun r -> r.Location) with
+                         | Some loc -> sprintf "Location: %f.3, %f.3" loc.Latitude loc.Longitude
+                         | None -> "Location Unknown"
+
+            View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly, children = [
+                View.Map(requestedRegion = model.MapRegion, minimumWidthRequest = 200.0, widthRequest = 400.0) |> flexGrow 1.0
+                View.Label(text = locMsg, verticalTextAlignment = TextAlignment.Center) |> flexGrow 1.0
+            ])
+
+        let buildNamedCircleImage txt fname msg = 
+            View.Frame(widthRequest = 100.0, heightRequest = 150.0, content = View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly, children = [
+                View.CircleImage(fname = fname, widthRequest = 75.0, heightRequest = 75.0)
+                View.Label(txt)
+                ]))
+            |> gestureRecognizers [ View.TapGestureRecognizer(command=(fun () -> dispatch msg)) ]
+
+        let buildPage2 = 
+            View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly, children = [
+                View.Label("Debris Type")
+                View.FlexLayout(wrap = FlexWrap.Wrap, justifyContent = FlexJustify.SpaceAround, children = [
+                    buildNamedCircleImage "Net" "debrist_net.jpg" <| MaterialPicked DebrisMaterialT.Net
+                    buildNamedCircleImage "Rope" "debrist_rope.jpg" <| MaterialPicked DebrisMaterialT.Rope
+                    buildNamedCircleImage "Mono" "debrist_mono.jpg" <| MaterialPicked DebrisMaterialT.Mono
+                    buildNamedCircleImage "Lumber/Bldg Material" "debrist_lumber.jpg" <| MaterialPicked DebrisMaterialT.BuildingMaterial
+                    buildNamedCircleImage "Cloth" "debrist_cloth.jpg" <| MaterialPicked DebrisMaterialT.Cloth
+                    buildNamedCircleImage "Plastic Sheeting" "debrist_sheeting.jpg" <| MaterialPicked DebrisMaterialT.Sheeting
+                    buildNamedCircleImage "Floats" "debrist_floats.jpg" <| MaterialPicked DebrisMaterialT.Floats 
+                    buildNamedCircleImage "Amalgam" "debrist_amalg.jpg" <| MaterialPicked DebrisMaterialT.Amalgam
+                    buildNamedCircleImage "Other/Unknown" "debrist_amalg.jpg" <| MaterialPicked DebrisMaterialT.Other
+                 
+                ]) |> flexGrow 1.0
+            ])
+
+        let buildPage3 = 
+            View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly, children = [
+                View.Label("Hitchhikers")
+                View.FlexLayout(wrap = FlexWrap.Wrap, justifyContent = FlexJustify.SpaceAround, children = [
+                    buildNamedCircleImage "Fish" "biotat_fish.jpg" <| BiotaPicked BiotaT.Fish
+                    buildNamedCircleImage "Crustaceans" "biotat_crustacean.jpg" <| BiotaPicked BiotaT.Crustaceans
+                    buildNamedCircleImage "Encrusting" "biotat_encrusting.jpg" <| BiotaPicked BiotaT.Encrusting
+                    buildNamedCircleImage "None" "biotat_none.jpg" <| BiotaPicked BiotaT.None
+                    buildNamedCircleImage "Other" "biotat_other.jpg" <| BiotaPicked BiotaT.Other
+
+                ]) |> flexGrow 1.0
+            ])
+        
+
         let buildInputPages = [
-            View.CircleImage(fname = "p1.png")
-            View.CircleImage(fname = "p2.png"); 
-            View.CircleImage "p3.png"
+            buildPage1 
+            buildPage2
+            buildPage3
         ]
 
         let buildPages = [
                     View.CarouselView(items = buildInputPages) |> flexGrow 1.0
-                    View.BoxView(color = Color.Blue) |> flexBasis (new FlexBasis(50.0f,false)) |> flexOrder -1
-                    View.BoxView(color = Color.Green) |> flexBasis (new FlexBasis(50.0f, false))
+                    //View.BoxView(color = Color.White) |> flexBasis (new FlexBasis(50.0f,false)) |> flexOrder -1
+                    //View.BoxView(color = Color.White) |> flexBasis (new FlexBasis(50.0f, false))
                     ]
 
         let buildContent = 
             View.FlexLayout(children = buildPages) |> flexGrow 1.0
 
         let buildFooter = 
-            View.Label(text = "FOOTER", fontSize = 24, backgroundColor = Color.Pink, horizontalTextAlignment = TextAlignment.Center) 
+            View.Button(text = "Report it!", fontSize = 24, isEnabled = model.Report.IsSome, command = fun () -> dispatch SubmitReport) 
             |> direction FlexDirection.Column 
             |> flexBasis (new FlexBasis(100.0f, false))
 
@@ -179,8 +232,7 @@ module App =
                                      | Some e -> e, true
                                      | None -> "", false
 
-        View.ContentPage(backgroundColor = Color.Pink,
-            content = View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly, 
+        View.ContentPage(content = View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly, 
                 children = 
                         [
                             buildHeader

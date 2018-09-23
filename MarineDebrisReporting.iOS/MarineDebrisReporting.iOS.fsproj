@@ -169,6 +169,18 @@
     <BundleResource Include="Resources\p6.png" />
     <BundleResource Include="Resources\p7.png" />
     <BundleResource Include="Resources\albie.jpg" />
+    <BundleResource Include="Resources\debrist_cloth.jpg" />
+    <BundleResource Include="Resources\debrist_floats.jpg" />
+    <BundleResource Include="Resources\debrist_lumber.jpg" />
+    <BundleResource Include="Resources\debrist_mono.jpg" />
+    <BundleResource Include="Resources\debrist_net.jpg" />
+    <BundleResource Include="Resources\debrist_rope.jpg" />
+    <BundleResource Include="Resources\debrist_sheeting.jpg" />
+    <BundleResource Include="Resources\biotat_other.jpg" />
+    <BundleResource Include="Resources\biotat_none.jpg" />
+    <BundleResource Include="Resources\biotat_encrusting.jpg" />
+    <BundleResource Include="Resources\biotat_crustacean.jpg" />
+    <BundleResource Include="Resources\biotat_fish.jpg" />
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json">
       <Visible>false</Visible>
     </ImageAsset>

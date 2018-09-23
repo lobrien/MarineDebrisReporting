@@ -10,30 +10,38 @@ module Model =
 
     // These need to be enums to match up with index in picker (could use `Dictionary<string,DebrisWeightT>` I suppose) 
     type DebrisWeightT = 
-        | Light = 0
-        | Totable = 1
-        | Liftable = 2
-        | CouplePeople = 3
-        | MachineOnly = 4
+    | Light = 0
+    | Totable = 1
+    | Liftable = 2
+    | CouplePeople = 3
+    | MachineOnly = 4
 
     type DebrisSizeT = 
-        | TrashElement = 0
-        | TrashPile = 1
-        | TrashField = 2
-        | DebrisElement = 3
-        | DebrisPile = 4
-        | Line = 5
-        | Other = 6
+    | TrashElement = 0
+    | TrashPile = 1
+    | TrashField = 2
+    | DebrisElement = 3
+    | DebrisPile = 4
+    | Line = 5
+    | Other = 6
 
     type DebrisMaterialT =
-        | Plastic = 0
-        | Glass = 1
-        | Wood = 2
-        | Metal = 3
-        | Fiberglas = 4
-        | FishingGear = 5
-        | Amalgam = 6
-        | Other = 7
+    | Net = 0
+    | Rope = 1
+    | Mono = 2
+    | BuildingMaterial = 3
+    | Cloth = 4
+    | Sheeting = 5
+    | Floats = 6
+    | Amalgam = 7
+    | Other = 8
+
+    type BiotaT = 
+    | Fish = 0
+    | Crustaceans = 1
+    | Encrusting = 2
+    | None = 3
+    | Other = 4
 
     type Report =
         {
@@ -43,6 +51,7 @@ module Model =
             Material : Option<DebrisMaterialT>
             Weight : Option<DebrisWeightT>
             Photo : Option<IO.Stream>
+            Biota : List<BiotaT>
             Notes : Option<String> 
         }
 
