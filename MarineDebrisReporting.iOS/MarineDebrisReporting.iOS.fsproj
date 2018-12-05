@@ -155,11 +155,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.FSharp.targets" Condition="Exists('$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.FSharp.targets')" />
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.fs" />
-    <Compile Include="AppDelegate.fs" />
-    <None Include="Entitlements.plist" />
-    <None Include="Info.plist" />
-    <None Include="packages.config" />
+    <BundleResource Include="Resources\map_none.png" />
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />
     <BundleResource Include="Resources\p1.png" />
     <BundleResource Include="Resources\p2.png" />
@@ -181,6 +177,21 @@
     <BundleResource Include="Resources\biotat_encrusting.jpg" />
     <BundleResource Include="Resources\biotat_crustacean.jpg" />
     <BundleResource Include="Resources\biotat_fish.jpg" />
+    <BundleResource Include="Resources\biotat_some.png" />
+    <BundleResource Include="Resources\debrist_some.png" />
+    <BundleResource Include="Resources\notes_some.png" />
+    <BundleResource Include="Resources\photo_some.png" />
+    <BundleResource Include="Resources\biotat_none.png" />
+    <BundleResource Include="Resources\debrist_none.png" />
+    <BundleResource Include="Resources\notes_none.png" />
+    <BundleResource Include="Resources\photo_none.png" />
+    <BundleResource Include="Resources\map_some.png" />
+    <BundleResource Include="Resources\map_none.png" />
+    <Compile Include="Properties\AssemblyInfo.fs" />
+    <Compile Include="AppDelegate.fs" />
+    <None Include="Entitlements.plist" />
+    <None Include="Info.plist" />
+    <None Include="packages.config" />
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json">
       <Visible>false</Visible>
     </ImageAsset>

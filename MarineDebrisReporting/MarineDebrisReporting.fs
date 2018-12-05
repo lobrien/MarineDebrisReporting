@@ -41,15 +41,6 @@ module App =
         Notes = None;
     }
 
-    let weightPickerSource = 
-        [| "Easy to pick up"; "One person could carry it a distance"; "One person could lift it"; "A couple people could carry it"; "Equipment necessary" |] 
-
-    let sizePickerSource = 
-        [| "Piece of trash"; "Pile of trash"; "Single large piece"; "Pile with large pieces"; "Ropey"; "Other / Unknown" |]
-
-    let materialPickerSource = 
-        [| "Plastic"; "Wood"; "Metal"; "Fiberglass"; "Fishing Gear"; "Assorted"; "Other / Unknown"|]
-
     let locationCmd = 
         async { 
             let! loc = Geolocation.GetLocationAsync() |> Async.AwaitTask
@@ -162,7 +153,7 @@ module App =
     let view model dispatch =
 
         let header = 
-            View.Label(text = "Opala in Paradise", fontSize = 24, horizontalTextAlignment = TextAlignment.Center)
+            View.Label(text = "Report Marine Debris", fontSize = 24, horizontalTextAlignment = TextAlignment.Center)
 
         let locationPage = 
             let locMsg = match model.Report |> Option.bind (fun r -> r.Location) with
@@ -184,7 +175,7 @@ module App =
                     ]))
             |> gestureRecognizers [ View.TapGestureRecognizer(command=(fun () -> dispatch msg)) ]
 
-        let debrisPage = 
+        let materialPage = 
             View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly, 
                 children = [
                     View.Label("Debris Type")
@@ -231,42 +222,34 @@ module App =
                 ]) 
 
         let gridDebrisPage = 
-            let mkButton text command row column =
+            let button row column text command =
                  View.Button(text = text, command=(fun () -> dispatch command))
                      .GridRow(row)
                      .GridColumn(column)
                      .FontSize(36.0)
-                     //.ButtonCornerRadius(0)
-
-            let mkNumberButton number row column =
-             (mkButton (string number) (MaterialPicked DebrisMaterialT.Amalgam) row column)
-                 .BackgroundColor(Color.White)
-                 .TextColor(Color.Black)
-
-            let orange = Color.FromRgb(0xff, 0xa5, 0)
-            let gray = Color.FromRgb(0x80, 0x80, 0x80)
-
-            let mkOperatorButton text operator row column =
-                (mkButton text (MaterialPicked DebrisMaterialT.Amalgam) row column)
-                    .BackgroundColor(orange)
-                    .TextColor(Color.Black)
-
+                     
             View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Stretch, justifyContent = FlexJustify.SpaceEvenly,
                 children = [
                    View.Grid(rowdefs=[ "*"; "*"; "*"; "*" ], coldefs=[ "*"; "*"; "*" ],
                      children=[
                          View.Label(text = "Type", fontSize = 48.0, fontAttributes = FontAttributes.Bold, backgroundColor = Color.Black, textColor = Color.White, horizontalTextAlignment = TextAlignment.Center, verticalTextAlignment = TextAlignment.Center).GridColumnSpan(3)
-                         mkNumberButton 7 1 0; mkNumberButton 8 1 1; mkNumberButton 9 1 2
-                         mkNumberButton 4 2 0; mkNumberButton 5 2 1; mkNumberButton 6 2 2
-                         mkNumberButton 1 3 0; mkNumberButton 2 3 1; mkNumberButton 3 3 2
-                     ], rowSpacing = 1.0, columnSpacing = 1.0, backgroundColor = gray
+                         button 1 0 "Netting" <| MaterialPicked DebrisMaterialT.Net 
+                         button 1 1 "Rope" <| MaterialPicked DebrisMaterialT.Rope
+                         button 1 2 "Monofil" <| MaterialPicked DebrisMaterialT.Mono
+                         button 2 0 "Sheeting" <| MaterialPicked DebrisMaterialT.Sheeting
+                         button 2 1 "Floats" <| MaterialPicked DebrisMaterialT.Floats
+                         button 2 2 "Plastic" <| MaterialPicked DebrisMaterialT.Plastic 
+                         button 3 0 "Bldg/Boat Material" <| MaterialPicked DebrisMaterialT.BuildingMaterial
+                         button 3 1 "Amalgam" <| MaterialPicked DebrisMaterialT.Amalgam
+                         button 3 2 "Other/Unknown" <| MaterialPicked DebrisMaterialT.Other
+                     ], rowSpacing = 1.0, columnSpacing = 1.0, backgroundColor = Color.Gray
                  )]) |> flexGrow 1.0
+
 
         // Bug: with my impl of `CarouselElement.OnBindingChanged`, this `T List` must be same concrete `T` (e.g., `FlexLayout` only not any `ViewElement`)
         let inputPages = [
             locationPage 
-            debrisPage
-            gridDebrisPage
+            materialPage
             biotaPage
             photoPage
             notesPage
@@ -282,9 +265,37 @@ module App =
             View.FlexLayout(children = pages) |> flexGrow 1.0
 
         let footer = 
+            let progressPanel = 
+                let isSome f = 
+                    match model.Report |> Option.bind f with 
+                    | Some _ -> true
+                    | None -> false  
+
+                let imageFor f imagePrefix = 
+                    match model.Report |> Option.bind f with
+                    | Some _ -> (true, sprintf "%s_some.png" imagePrefix)
+                    | None -> (false, sprintf "%s_none.png" imagePrefix)
+
+                let (hasLoc, locImage) = imageFor (fun r -> r.Location) "map"
+                let (hasDebrisT, debrisImage) = imageFor (fun r -> r.Material) "debrist"
+                let (hasBiotaT, biotaImage) = imageFor (fun r -> if List.Empty = r.Biota then Some true else None) "biotat"
+                let (hasPhoto, photoImage) = imageFor (fun r -> r.Photo) "photo"
+                let (hasNotes, notesImage) = imageFor (fun r -> r.Notes) "notes"
+
+
+                View.FlexLayout(direction = FlexDirection.Row, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly, 
+                    children = [
+                        View.CircleImage(fname = locImage, widthRequest = 75.0, heightRequest = 75.0, backgroundColor = if hasLoc then Color.Transparent else Color.Gray)
+                        View.CircleImage(fname = debrisImage, widthRequest = 75.0, heightRequest = 75.0)
+                        View.CircleImage(fname = biotaImage, widthRequest = 75.0, heightRequest = 75.0)
+                        View.CircleImage(fname = photoImage, widthRequest = 75.0, heightRequest = 75.0)
+                        View.CircleImage(fname = notesImage, widthRequest = 75.0, heightRequest = 75.0)
+                ]) |> flexGrow 1.0
+
+
             View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly, 
                 children = [
-                    View.CircleImage(fname = "albie.jpg", widthRequest = 75.0, heightRequest = 75.0)
+                    progressPanel
                     View.Button(text = "Report it!", fontSize = 24, isEnabled = model.Report.IsSome, command = fun () -> dispatch SubmitReport) 
 
                 ])

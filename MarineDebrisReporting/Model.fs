@@ -34,7 +34,8 @@ module Model =
     | Sheeting = 5
     | Floats = 6
     | Amalgam = 7
-    | Other = 8
+    | Plastic = 8
+    | Other = 9
 
     type BiotaT = 
     | Fish = 0

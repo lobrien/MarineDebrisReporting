@@ -1,10 +1,11 @@
 # Marine Debris Reporting: Hack the Sea Honolulu
 
-Marine debris is a global problem and one that strikes close to our home here 
-in Hawai'i. Trash has already been spotted on the blacksand beaches of Poho'iki -- beaches that were only created by the lava flows of this Summer. The problem of floating debris resonates with me personally, as on
+Whether you call it flotsam and jetsam, trash, or opala, Marine debris is a global problem and one that strikes close to our home here in Hawai'i. Trash has already been spotted on the blacksand beaches of Poho'iki on the Big Island -- beaches that were only created a short few weeks ago. The problem of floating debris resonates with me personally, as on
 my birthday a few years ago we came upon a young dolphin, drowned in fishing gear.
 
 ![last sight image](tk)
+
+I've also seen monofilament line make horrific wounds on manta rays and we've even lost one of our baby Hawaiian monk seals to discarded fishing gear. 
 
 This Marine Debris Reporting app is a functional mobile application that runs on
 both Android and iOS devices and uploads reports of marine debris to the Azure 
