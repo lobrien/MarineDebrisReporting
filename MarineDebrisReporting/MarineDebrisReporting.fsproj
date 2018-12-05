@@ -10,22 +10,19 @@
     <Compile Include="MarineDebrisReporting.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="3.2.0.839982" />
-    <PackageReference Include="Xamarin.Essentials" Version="0.10.0-preview" />
-    <PackageReference Include="Fabulous.Core" Version="0.21.1" />
-    <PackageReference Include="Fabulous.LiveUpdate" Version="0.21.1" />
+    <PackageReference Include="Xamarin.Forms" Version="3.4.0.1008975" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.0.0" />
+    <PackageReference Include="Fabulous.Core" Version="0.28.0" />
+    <PackageReference Include="Fabulous.LiveUpdate" Version="0.28.0" />
     <PackageReference Include="FSharp.Core" Version="4.5.2" />
-    <PackageReference Update="FSharp.Core" Version="4.5.2" />
+    <PackageReference Update="FSharp.Core" Version="4.5.4" />
     <!-- workaround for VSMac bug https://github.com/mono/monodevelop/pull/5137 -->
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="WindowsAzure.Storage" Version="9.3.2" />
-    <PackageReference Include="Xamarin.Forms.Maps" Version="3.2.0.839982" />
-    <PackageReference Include="Fabulous.Maps" Version="0.21.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
+    <PackageReference Include="Xamarin.Forms.Maps" Version="3.4.0.1008975" />
+    <PackageReference Include="Fabulous.Maps" Version="0.28.0" />
     <PackageReference Include="Xam.Plugin.Media" Version="4.0.1.5" />
     <PackageReference Include="Xam.Plugins.Forms.ImageCircle" Version="3.0.0.6-beta" />
     <PackageReference Include="Xamarin.Forms.CarouselView" Version="2.3.0-pre2" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="New Folder\" />
   </ItemGroup>
 </Project>
