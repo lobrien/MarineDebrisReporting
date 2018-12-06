@@ -157,7 +157,7 @@ module App =
 
         let locationPage = 
             let locMsg = match model.Report |> Option.bind (fun r -> r.Location) with
-                         | Some loc -> sprintf "Location: %f.3, %f.3" loc.Latitude loc.Longitude
+                         | Some loc -> sprintf "Location: %.3f, %.3f" loc.Latitude loc.Longitude
                          | None -> "Location Unknown"
 
             View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly, 
@@ -181,16 +181,17 @@ module App =
                     View.Label("Debris Type")
                     View.FlexLayout(wrap = FlexWrap.Wrap, justifyContent = FlexJustify.SpaceAround, 
                         children = [
-                            namedCircleImage "Net" "debrist_net.jpg" <| MaterialPicked DebrisMaterialT.Net
-                            namedCircleImage "Rope" "debrist_rope.jpg" <| MaterialPicked DebrisMaterialT.Rope
-                            namedCircleImage "Mono" "debrist_mono.jpg" <| MaterialPicked DebrisMaterialT.Mono
-                            namedCircleImage "Lumber/Bldg Material" "debrist_lumber.jpg" <| MaterialPicked DebrisMaterialT.BuildingMaterial
-                            namedCircleImage "Cloth" "debrist_cloth.jpg" <| MaterialPicked DebrisMaterialT.Cloth
-                            namedCircleImage "Plastic Sheeting" "debrist_sheeting.jpg" <| MaterialPicked DebrisMaterialT.Sheeting
-                            namedCircleImage "Floats" "debrist_floats.jpg" <| MaterialPicked DebrisMaterialT.Floats 
-                            namedCircleImage "Amalgam" "debrist_amalg.jpg" <| MaterialPicked DebrisMaterialT.Amalgam
-                            namedCircleImage "Other/Unknown" "debrist_amalg.jpg" <| MaterialPicked DebrisMaterialT.Other
-
+                            namedCircleImage "Net" "p1.png" <| MaterialPicked DebrisMaterialT.Net
+                            namedCircleImage "Rope" "p2.png" <| MaterialPicked DebrisMaterialT.Rope
+                            namedCircleImage "Mono" "p3.png" <| MaterialPicked DebrisMaterialT.Mono
+                            namedCircleImage "Lumber/Bldg Material" "p4.png" <| MaterialPicked DebrisMaterialT.BuildingMaterial
+                            namedCircleImage "Cloth" "p5.png" <| MaterialPicked DebrisMaterialT.Cloth
+                            (* 
+                            namedCircleImage "Plastic Sheeting" "p6.png" <| MaterialPicked DebrisMaterialT.Sheeting
+                            namedCircleImage "Floats" "p7.png" <| MaterialPicked DebrisMaterialT.Floats 
+                            namedCircleImage "Amalgam" "p1.png" <| MaterialPicked DebrisMaterialT.Amalgam
+                            namedCircleImage "Other/Unknown" "p2.png" <| MaterialPicked DebrisMaterialT.Other
+                            *)
                         ]) |> flexGrow 1.0
                 ])
 
@@ -200,11 +201,11 @@ module App =
                     View.Label("Hitchhikers")
                     View.FlexLayout(wrap = FlexWrap.Wrap, justifyContent = FlexJustify.SpaceAround, 
                         children = [
-                            namedCircleImage "Fish" "biotat_fish.jpg" <| BiotaPicked BiotaT.Fish
-                            namedCircleImage "Crustaceans" "biotat_crustacean.jpg" <| BiotaPicked BiotaT.Crustaceans
-                            namedCircleImage "Encrusting" "biotat_encrusting.jpg" <| BiotaPicked BiotaT.Encrusting
-                            namedCircleImage "None" "biotat_none.jpg" <| BiotaPicked BiotaT.None
-                            namedCircleImage "Other" "biotat_other.jpg" <| BiotaPicked BiotaT.Other
+                            namedCircleImage "Fish" "p1.png" <| BiotaPicked BiotaT.Fish
+                            namedCircleImage "Crustaceans" "p2.png" <| BiotaPicked BiotaT.Crustaceans
+                            namedCircleImage "Encrusting" "p3.png" <| BiotaPicked BiotaT.Encrusting
+                            namedCircleImage "None" "p4.png" <| BiotaPicked BiotaT.None
+                            namedCircleImage "Other" "p5.png" <| BiotaPicked BiotaT.Other
 
                         ]) |> flexGrow 1.0
                 ])
@@ -257,8 +258,6 @@ module App =
 
         let pages = [
                     View.CarouselView(items = inputPages) |> flexGrow 1.0
-                    //View.BoxView(color = Color.White) |> flexBasis (new FlexBasis(50.0f,false)) |> flexOrder -1
-                    //View.BoxView(color = Color.White) |> flexBasis (new FlexBasis(50.0f, false))
                     ]
 
         let content = 
@@ -278,7 +277,7 @@ module App =
 
                 let (hasLoc, locImage) = imageFor (fun r -> r.Location) "map"
                 let (hasDebrisT, debrisImage) = imageFor (fun r -> r.Material) "debrist"
-                let (hasBiotaT, biotaImage) = imageFor (fun r -> if List.Empty = r.Biota then Some true else None) "biotat"
+                let (hasBiotaT, biotaImage) = imageFor (fun r -> if r.Biota.Length > 0 then Some r.Biota.[0] else None) "biotat"
                 let (hasPhoto, photoImage) = imageFor (fun r -> r.Photo) "photo"
                 let (hasNotes, notesImage) = imageFor (fun r -> r.Notes) "notes"
 
