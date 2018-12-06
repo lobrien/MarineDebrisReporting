@@ -239,7 +239,22 @@
     <AndroidResource Include="Resources\drawable\p6.png" />
     <AndroidResource Include="Resources\drawable\p7.png" />
     <AndroidResource Include="Resources\drawable\albie.jpg" />
-    <AndroidResource Include="Resources\drawable\IMG_0480.JPG" />
+    <AndroidResource Include="Resources\drawable\notes_some.png" />
+    <AndroidResource Include="Resources\drawable\notes_none.png" />
+    <AndroidResource Include="Resources\drawable\what_some.png" />
+    <AndroidResource Include="Resources\drawable\what_none.png" />
+    <AndroidResource Include="Resources\drawable\where_none.png" />
+    <AndroidResource Include="Resources\drawable\where_some.png" />
+    <AndroidResource Include="Resources\drawable\photo_none.png" />
+    <AndroidResource Include="Resources\drawable\photo_some.png" />
+    <AndroidResource Include="Resources\drawable\who_some.png" />
+    <AndroidResource Include="Resources\drawable\who_none.png" />
+    <AndroidResource Include="Resources\drawable\map_none.png" />
+    <AndroidResource Include="Resources\drawable\map_some.png" />
+    <AndroidResource Include="Resources\drawable\biotat_some.png" />
+    <AndroidResource Include="Resources\drawable\debrist_some.png" />
+    <AndroidResource Include="Resources\drawable\biotat_none.png" />
+    <AndroidResource Include="Resources\drawable\debrist_none.png" />
     <None Include="packages.config" />
     <ProjectReference Include="..\MarineDebrisReporting\MarineDebrisReporting.fsproj">
       <Project>{3A810F51-58C0-4C2D-B9A7-22C4C3792A22}</Project>

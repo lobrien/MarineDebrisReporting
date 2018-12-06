@@ -180,6 +180,12 @@
     <BundleResource Include="Resources\notes_none.png" />
     <BundleResource Include="Resources\photo_none.png" />
     <BundleResource Include="Resources\map_some.png" />
+    <BundleResource Include="Resources\where_some.png" />
+    <BundleResource Include="Resources\where_none.png" />
+    <BundleResource Include="Resources\what_some.png" />
+    <BundleResource Include="Resources\what_none.png" />
+    <BundleResource Include="Resources\who_some.png" />
+    <BundleResource Include="Resources\who_none.png" />
     <Compile Include="Properties\AssemblyInfo.fs" />
     <Compile Include="AppDelegate.fs" />
     <None Include="Entitlements.plist" />

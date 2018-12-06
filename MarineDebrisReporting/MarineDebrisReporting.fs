@@ -85,6 +85,23 @@ module App =
                     return "Media capture did not initialize" |> Error
         } |> Cmd.ofAsyncMsg
 
+    let PhotoPickAsync = 
+        async {
+            let! successfulInit = CrossMedia.Current.Initialize() |> Async.AwaitTask
+            match successfulInit, CrossMedia.Current.IsPickPhotoSupported with 
+                | true, true  -> 
+                    let options = new Plugin.Media.Abstractions.PickMediaOptions()
+                    options.SaveMetaData <- false
+                    let! file = CrossMedia.Current.PickPhotoAsync(options) |> Async.AwaitTask
+                    match file <> null with 
+                    | true -> 
+                        return file.GetStreamWithImageRotatedForExternalStorage() |> Some |> PhotoTaken
+                    | false -> 
+                        return "Media pick did not work" |> Error
+                | _ -> 
+                    return "Media pick did not initialize" |> Error
+        } |> Cmd.ofAsyncMsg
+
 
     // Put directly in Azure blob storage 
     let photoSubmissionAsync (cloudStorageAccount : CloudStorageAccount) imageType (maybePhoto : IO.Stream option) imageName = 
@@ -137,7 +154,7 @@ module App =
             let report = { oldReport with Location = Some loc }
             let newRegion = new MapSpan(new Position(loc.Latitude, loc.Longitude), 0.025, 0.025)
             { model with MapRegion = newRegion; Report = Some report }, Cmd.none
-        | TakePhoto -> model, PhotoCaptureAsync
+        | TakePhoto -> model, PhotoPickAsync
         | PhotoTaken photo -> 
             { model with Report = Some { oldReport with Photo = photo }}, Cmd.none
         | SubmitReport -> model, SubmitReportAsync(model.Report)
@@ -211,9 +228,18 @@ module App =
                 ])
 
         let photoPage = 
-            View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Stretch, justifyContent = FlexJustify.SpaceEvenly,
+            let photoView = 
+                model.Report 
+                |> Option.bind (fun r -> r.Photo)
+                |> fun maybePhoto -> match maybePhoto with 
+                                     | Some photo -> View.Image(source = ImageSource.FromStream( fun (_) -> photo), horizontalOptions = LayoutOptions.Center, widthRequest = 200.0, heightRequest = 200.0)
+                                     | None -> View.BoxView (Color.LightGray, horizontalOptions = LayoutOptions.Center, widthRequest = 200.0, heightRequest = 200.0)
+
+            View.FlexLayout(direction = FlexDirection.Column, alignItems = FlexAlignItems.Center, justifyContent = FlexJustify.SpaceEvenly,
                 children = [
-                    View.BoxView(Color.Gray) |> flexGrow 1.0
+                    View.Label ("Photo" , horizontalOptions = LayoutOptions.Center)
+                    View.Button(text = "Choose photo", command = (fun () -> dispatch TakePhoto), horizontalOptions = LayoutOptions.Center)
+                    photoView 
                 ]) 
 
         let notesPage = 
@@ -253,7 +279,7 @@ module App =
             materialPage
             biotaPage
             photoPage
-            notesPage
+ //           notesPage
         ]
 
         let pages = [
@@ -275,9 +301,9 @@ module App =
                     | Some _ -> (true, sprintf "%s_some.png" imagePrefix)
                     | None -> (false, sprintf "%s_none.png" imagePrefix)
 
-                let (hasLoc, locImage) = imageFor (fun r -> r.Location) "map"
-                let (hasDebrisT, debrisImage) = imageFor (fun r -> r.Material) "debrist"
-                let (hasBiotaT, biotaImage) = imageFor (fun r -> if r.Biota.Length > 0 then Some r.Biota.[0] else None) "biotat"
+                let (hasLoc, locImage) = imageFor (fun r -> r.Location) "where"
+                let (hasDebrisT, debrisImage) = imageFor (fun r -> r.Material) "what"
+                let (hasBiotaT, biotaImage) = imageFor (fun r -> if r.Biota.Length > 0 then Some r.Biota.[0] else None) "who"
                 let (hasPhoto, photoImage) = imageFor (fun r -> r.Photo) "photo"
                 let (hasNotes, notesImage) = imageFor (fun r -> r.Notes) "notes"
 
@@ -288,7 +314,7 @@ module App =
                         View.CircleImage(fname = debrisImage, widthRequest = 75.0, heightRequest = 75.0)
                         View.CircleImage(fname = biotaImage, widthRequest = 75.0, heightRequest = 75.0)
                         View.CircleImage(fname = photoImage, widthRequest = 75.0, heightRequest = 75.0)
-                        View.CircleImage(fname = notesImage, widthRequest = 75.0, heightRequest = 75.0)
+                    //    View.CircleImage(fname = notesImage, widthRequest = 75.0, heightRequest = 75.0)
                 ]) |> flexGrow 1.0
 
 
